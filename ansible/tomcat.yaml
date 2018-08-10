@@ -1,0 +1,38 @@
+- name: example ec2 group
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: SG creation
+      ec2_group:
+        name: AnsibleSG
+        description: created from ansible
+        vpc_id: vpc-fc6af487
+        region: us-east-1
+        rules:
+           - proto: tcp
+             from_port: 8080
+             to_port: 8080
+             cidr_ip: 0.0.0.0/0
+           - proto: tcp
+             from_port: 80
+             to_port: 80
+             cidr_ip: 0.0.0.0/0
+           - proto: tcp
+             from_port: 22
+             to_port: 22
+             cidr_ip: 0.0.0.0/0
+- name: Create a sandbox instance
+  hosts: localhost
+  tasks:
+    - name: launch micro instance
+      ec2:
+        key_name: MyNVPair
+        region: us-east-1
+        instance_type: t2.micro
+        image: ami-b70554c8
+        user_data: "{{ lookup('file', '/tmp/ansible/user_data.sh') }}"
+        wait: yes
+        group: AnsibleSG
+        count: 1
+        vpc_subnet_id: subnet-47b11848
+        assign_public_ip: yes

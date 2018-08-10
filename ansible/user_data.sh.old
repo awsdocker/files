@@ -1,0 +1,6 @@
+#!/bin/bash
+sudo yum update -y
+sudo yum install httpd -y
+sudo service httpd start
+sudo echo "Hello SHiva" >> /tmp/index.html
+sudo cp -p /tmp/index.html /var/www/html/

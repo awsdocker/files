@@ -1,0 +1,33 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.24">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.54">
+    <script>node{
+   stage(&apos;SCM Checkout&apos;){
+       git credentialsId: &apos;git-credentials&apos;, url: &apos;https://github.com/pranay1404/myApp&apos;
+   }
+   stage(&apos;Mvn Package&apos;){
+     def mvnHome = tool name: &apos;maven-3&apos;, type: &apos;maven&apos;
+     def mvnCMD = &quot;${mvnHome}/bin/mvn&quot;
+     sh &quot;${mvnCMD} clean package&quot;
+   }
+   stage(&apos;Build Docker Image&apos;){
+     sh &apos;docker build -t pranay1404/appdeploy:1.0.0 .&apos;
+   }
+   stage(&apos;Push Docker Image&apos;){
+     withCredentials([string(credentialsId: &apos;docker-pwd&apos;, variable: &apos;dockerHubPwd&apos;)]) {
+        sh &quot;docker login -u pranay1404 -p ${dockerHubPwd}&quot;
+     }
+     sh &apos;docker push pranay1404/appdeploy:1.0.0&apos;
+   }
+   
+}
+</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
